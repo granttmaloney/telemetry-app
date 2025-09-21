@@ -9,6 +9,7 @@ import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
 import PlotPage from './pages/PlotPage';
 import Sidebar, { SidebarItem } from './components/Sidebar';
+import ChatbotWidget from './components/ChatbotWidget';
 import {
   HiOutlineHome,
   HiOutlineClipboardCheck,
@@ -32,6 +33,10 @@ const NAV_ITEMS: SidebarItem[] = [
 const App: React.FC = () => {
   const location = useLocation();
   const isPlotRoute = location.pathname.startsWith('/plot');
+  const [isChatbotOpen, setIsChatbotOpen] = React.useState(true);
+  const [isSidebarExpanded, setIsSidebarExpanded] = React.useState(false);
+  const handleSidebarExpand = React.useCallback(() => setIsSidebarExpanded(true), []);
+  const handleSidebarCollapse = React.useCallback(() => setIsSidebarExpanded(false), []);
 
   const contentClassName = `app-content${isPlotRoute ? ' app-content--plot' : ''}`;
 
@@ -48,7 +53,14 @@ const App: React.FC = () => {
         </header>
       )}
       <div className={`app-body${isPlotRoute ? ' app-body--plot' : ''}`}>
-        {!isPlotRoute && <Sidebar items={NAV_ITEMS} />}
+        {!isPlotRoute && (
+          <Sidebar
+            items={NAV_ITEMS}
+            expanded={isSidebarExpanded}
+            onExpand={handleSidebarExpand}
+            onCollapse={handleSidebarCollapse}
+          />
+        )}
         <main className={contentClassName}>
           <Routes>
             <Route path="/" element={<DashboardPage />} />
@@ -57,11 +69,24 @@ const App: React.FC = () => {
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route
+              path="/settings"
+              element={
+                <SettingsPage
+                  onOpenChatbot={() => setIsChatbotOpen(true)}
+                  isChatbotOpen={isChatbotOpen}
+                />
+              }
+            />
             <Route path="/plot/:plotId" element={<PlotPage />} />
           </Routes>
         </main>
       </div>
+      <ChatbotWidget
+        isOpen={isChatbotOpen}
+        onClose={() => setIsChatbotOpen(false)}
+        onOpen={() => setIsChatbotOpen(true)}
+      />
     </div>
   );
 };
